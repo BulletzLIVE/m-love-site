@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>For You 💗</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: 'Quicksand', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(
+        120deg,
+        #b48fc6,
+        #d7a1c9,
+        #f0c6d8
+      );
+      background-size: 300% 300%;
+      animation: bgShift 20s ease infinite;
+    }
+
+    @keyframes bgShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* MAIN CONTAINER */
+    .page-card {
+      width: 90%;
+      max-width: 1100px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 40px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* IMAGE SIDE */
+    .image-side {
+      width: 45%;
+      background: #f3e2ef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .image-side img {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      object-fit: cover;
+    }
+
+    /* LETTER SIDE */
+    .letter-side {
+      width: 55%;
+      padding: 60px 60px;
+      color: #6a3b5c;
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2.4rem;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .letter {
+      font-size: 1.05rem;
+      line-height: 1.75;
+    }
+
+    .letter p {
+      margin-bottom: 18px;
+    }
+
+    .signature {
+      margin-top: 40px;
+      font-family: 'Pacifico', cursive;
+      font-size: 1.6rem;
+      text-align: right;
+    }
+
+    /* SCROLLBAR (subtle & nice) */
+    .letter-side::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .letter-side::-webkit-scrollbar-thumb {
+      background: rgba(180,140,180,0.4);
+      border-radius: 10px;
+    }
+
+    /* MOBILE */
+    @media (max-width: 900px) {
+      .page-card {
+        flex-direction: column;
+      }
+
+      .image-side,
+      .letter-side {
+        width: 100%;
+      }
+
+      .letter-side {
+        padding: 40px 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+    <audio id="bg-music" loop>
+    <source src="music/TaylotCardigan.mp3" type="audio/mpeg">
+    </audio>
+
+  <div class="page-card">
+
+    <!-- IMAGE SIDE -->
+    <div class="image-side">
+      <img src="images/NouraDuo.png" alt="Us Together">
+    </div>
+
+    <!-- LETTER SIDE -->
+    <div class="letter-side">
+      <h1>What You Mean to Me</h1>
+
+      <div class="letter">
+        <p>
+          This page is for the things I don’t always say out loud, but feel all the time.
+          Being with you has brought a sense of comfort and happiness into my life. You make things feel
+          lighter just by being there, and I’m grateful for that more than you know.
+
+          I find myself thinking about all the little adventures that we will go on together. I’m excited to
+          watch every movie series ever together (first by finishing off Star Wars), finding new favorites,
+          rewatching the ones we already love, and turning our nights into something special just
+          by spending them side by side. I can’t wait to travel with you, to see new places together, and
+          to make memories that feel uniquely ours.
+
+          I want to learn to grow together, not just in our relationship, but as individuals too. I’m excited
+          to support you in everything you want to do, and to keep working toward my own goals alongside
+          you, learning, improving, and figuring things out together. It means a lot to me that we can be
+          ourselves while still choosing each other.
+
+          You’ve probably realized now that I notice the little things about you,the way you laugh, the shy
+          giggles you try to hide when I shower you with love, and how cute you are when you don’t quite know
+          how to react to it. I love how you tease me for the way I talk, for how I mess around with my friends,
+          and how you see all sides of me and choose to stay anyway. Those small moments are the ones that stick
+          with me the most.
+
+
+          I want you to know that I don’t forget the details. I notice what makes you smile, what makes you
+          comfortable, and what makes you feel safe. And when you need me, truly need me, I want to
+          be there for you. I want to take care of you, support you, and show up in the ways that matter —
+          not because I feel like I have to, but because I want to.
+
+          I choose you. I’m grateful for you. And I’m excited for everything we still have ahead of us.
+        </p>
+      </div>
+
+      <div class="signature">
+        — Devlin
+      </div>
+    </div>
+
+  </div>
+<script>
+    const music = document.getElementById("bg-music");
+    const MUSIC_TIME_KEY = "musicTime";
+    const MUSIC_PLAY_KEY = "musicPlaying";
+
+    const savedTime = localStorage.getItem(MUSIC_TIME_KEY);
+    const shouldPlay = localStorage.getItem(MUSIC_PLAY_KEY) !== "false";
+
+    if (savedTime) {
+      music.currentTime = parseFloat(savedTime);
+    }
+
+    music.volume = 0.5;
+
+    document.addEventListener("click", () => {
+      if (music.paused && shouldPlay) {
+        music.play().catch(() => {});
+        localStorage.setItem(MUSIC_PLAY_KEY, "true");
+      }
+    }, { once: true });
+
+    setInterval(() => {
+      if (!music.paused) {
+        localStorage.setItem(MUSIC_TIME_KEY, music.currentTime);
+      }
+    }, 500);
+
+    music.addEventListener("play", () => {
+      localStorage.setItem(MUSIC_PLAY_KEY, "true");
+    });
+
+    music.addEventListener("pause", () => {
+      localStorage.setItem(MUSIC_PLAY_KEY, "false");
+    });
+  </script>
+
+</body>
+</html>

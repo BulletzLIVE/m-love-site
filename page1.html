@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Our Story 💖</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #c79ec5, #97748b);
+      font-family: 'Quicksand', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .gift-page {
+      width: 90%;
+      height: 85%;
+      display: flex;
+      background: rgba(223, 182, 207, 0.95);
+      border-radius: 40px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    /* LEFT SIDE */
+    .left-panel {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      align-items: center;
+      background: rgba(223, 182, 207, 0.95);
+      backdrop-filter: blur(6px);
+    }
+
+    .left-panel img {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 25px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+    }
+
+    .bio-box {
+        background: rgba(255,255,255,0.25);
+        border-radius: 25px;
+        padding: 25px;
+        width: 100%;
+        max-width: 420px;
+        color: #fff;
+    }
+
+    .bio-box h2 {
+        font-family: 'Pacifico', cursive;
+        margin-bottom: 15px;
+    }
+
+    /* RIGHT SIDE */
+    .right-panel {
+        flex: 1;
+        padding: 50px;
+        color: #ffffff;
+        overflow-y: auto;
+
+        background: rgba(223, 182, 207, 0.95);
+        backdrop-filter: blur(6px);
+    }
+
+    .right-panel h1 {
+        font-family: 'Pacifico', cursive;
+        margin-bottom: 20px;
+    }
+
+    .story {
+      background: rgba(255,255,255,0.18);
+      border-radius: 30px;
+      padding: 30px;
+      line-height: 1.7;
+      font-size: 1.05rem;
+    }
+
+    /* SCROLLBAR (nice touch) */
+    .right-panel::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .right-panel::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.4);
+      border-radius: 10px;
+    }
+
+    /* MOBILE */
+    @media (max-width: 900px) {
+      .gift-page {
+        flex-direction: column;
+      }
+    }
+
+    #petals {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+.gift-page {
+  position: relative;
+  z-index: 1;
+}
+
+.left-panel, .right-panel {
+        box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+  <audio id="bg-music" loop>
+    <source src="music/TaylotCardigan.mp3" type="audio/mpeg">
+  </audio>
+
+
+    <canvas id="petals"></canvas>
+    <div class="gift-page">
+
+    <!-- LEFT SIDE -->
+    <div class="left-panel">
+        
+        <img src="images/NouraDate.png" alt="Her Image">
+
+        <div class="bio-box">
+            <h1>Noura Abuelrous 💕</h1>
+            <p>
+            I hope this doesn’t come off as too much, but I’ve found such genuine joy and comfort in our relationship.
+This gift is just a small token of my appreciation for you and for 
+everything you do to make our time together feel so special, 
+even if it doesn’t seem like a lot right now.
+It’s really just a memory of us, one that I find myself replaying 
+over and over.
+
+I remember planning for that day so vividly. 
+I wanted everything to feel right, 
+from the little details to the way the night unfolded. 
+
+            </p>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right-panel">
+        <h1>Our First Date </h1>
+
+        <div class="story">
+            <p>
+            Before we even left, when you stepped out of the bathroom in my dorm 
+            and I handed you those flowers, I remember feeling completely stunned. 
+            You looked so beautiful that for a moment I forgot what I was even 
+            supposed to say. I wanted to ask you right then and there to be my girlfriend, but I wasn’t brave enough yet. I just stood there, taking 
+            you in.
+            We went out to an Italian restaurant that night, one with warmth, character, 
+            and a story behind it. 
+            Somehow, Italian places have become something we always seem to lean toward, 
+            and I think it started right there. Walking through the Italian district in San Francisco with you, talking as we went, felt different from any walk I’d taken before. We talked about little things and meaningful ones, and with every step I felt closer to you. Being next to you felt easy, familiar, and comforting.
+
+            Dinner felt like it passed both slowly and too quickly at the same time. 
+            I remember how natural our conversation felt, how comfortable I was 
+            just being myself around you. It was a feeling I hadn’t felt in a long 
+            time, and I didn’t want it to end.
+
+            When we finally made it back to my dorm and into my room, everything 
+            felt calm in the best way. That’s when I realized I didn’t want to 
+            keep waiting. I took a breath, found the courage I’d been missing 
+            earlier, and asked you to be my girlfriend. It felt simple, honest, 
+            and right.
+
+            That night means a lot to me, not because it was perfect, but because 
+            it was us. And every day since has just made that feeling stronger. 
+            </p>
+        </div>
+    </div>
+
+    </div>
+
+<script>
+    const music = document.getElementById("bg-music");
+    const MUSIC_TIME_KEY = "musicTime";
+    const MUSIC_PLAY_KEY = "musicPlaying";
+
+    const savedTime = localStorage.getItem(MUSIC_TIME_KEY);
+    const shouldPlay = localStorage.getItem(MUSIC_PLAY_KEY) !== "false";
+
+    if (savedTime) {
+      music.currentTime = parseFloat(savedTime);
+    }
+
+    music.volume = 0.5;
+
+    document.addEventListener("click", () => {
+      if (music.paused && shouldPlay) {
+        music.play().catch(() => {});
+        localStorage.setItem(MUSIC_PLAY_KEY, "true");
+      }
+    }, { once: true });
+
+    setInterval(() => {
+      if (!music.paused) {
+        localStorage.setItem(MUSIC_TIME_KEY, music.currentTime);
+      }
+    }, 500);
+
+    music.addEventListener("play", () => {
+      localStorage.setItem(MUSIC_PLAY_KEY, "true");
+    });
+
+    music.addEventListener("pause", () => {
+      localStorage.setItem(MUSIC_PLAY_KEY, "false");
+    });
+
+    const canvas = document.getElementById("petals");
+    const ctx = canvas.getContext("2d");
+
+    
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  const petals = [];
+
+  function createPetal() {
+    petals.push({
+      x: Math.random() * canvas.width,
+      y: -20,
+      size: 6 + Math.random() * 8,
+      speed: 0.5 + Math.random() * 1,
+      sway: Math.random() * Math.PI * 2,
+      rotation: Math.random() * Math.PI * 2,
+      color: Math.random() > 0.5 ? "#ffd6e8" : "#fff0f5"
+    });
+  }
+
+  for (let i = 0; i < 25; i++) createPetal();
+
+  function drawPetal(p) {
+    const drift = Math.sin(p.sway) * 1.5;
+
+    ctx.save();
+    ctx.translate(p.x + drift, p.y);
+    ctx.rotate(p.rotation);
+
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(6, -10, 12, 0);
+    ctx.quadraticCurveTo(6, 10, 0, 0);
+    ctx.fill();
+
+    ctx.restore();
+
+    p.y += p.speed;
+    p.sway += 0.02;
+    p.rotation += 0.01;
+
+    if (p.y > canvas.height + 20) {
+      p.y = -20;
+      p.x = Math.random() * canvas.width;
+    }
+  }
+
+  function animatePetals() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    petals.forEach(drawPetal);
+    requestAnimationFrame(animatePetals);
+  }
+
+  animatePetals();
+</script>
+
+
+</body>
+</html>

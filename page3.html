@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Follow the Path 🦇🐱</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Quicksand', sans-serif;
+      color: white;
+      background: #060818;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+
+    /* UI */
+    .hud {
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .pill {
+      pointer-events: auto;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px);
+      border-radius: 999px;
+      padding: 10px 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+      font-size: 0.95rem;
+    }
+
+    .title {
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .title h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2rem;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .title p {
+      margin: 6px 0 0 0;
+      opacity: 0.85;
+      font-size: 0.95rem;
+    }
+
+    button {
+      pointer-events: auto;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-family: 'Pacifico', cursive;
+      background: #ff6fae;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.25s ease;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      background: #ff9fc9;
+    }
+
+    /* Win modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(8px);
+      padding: 20px;
+    }
+
+    .card {
+      width: min(720px, 92vw);
+      background: rgba(255,255,255,0.92);
+      color: #4a2140;
+      border-radius: 30px;
+      padding: 28px 28px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+      text-align: center;
+    }
+
+    .card h2 {
+      font-family: 'Pacifico', cursive;
+      margin: 0 0 10px 0;
+      font-size: 2rem;
+    }
+
+    .card p {
+      margin: 10px 0 0 0;
+      line-height: 1.6;
+      font-size: 1.05rem;
+    }
+
+    .card .actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Music (continues across pages using localStorage) -->
+  <audio id="bg-music" loop>
+    <source src="music/TaylotCardigan.mp3" type="audio/mpeg">
+  </audio>
+
+  <canvas id="scene"></canvas>
+
+  <div class="hud">
+    <div class="pill" id="status">Stay on the glowing path</div>
+
+    <div class="title">
+      <h1>BatCat Night Run</h1>
+      <p>Guide us to the heart without touching the edge.</p>
+    </div>
+
+    <button onclick="resetGame()">Reset</button>
+  </div>
+
+  <div class="modal" id="winModal">
+    <div class="card">
+      <h2>You made it 💘</h2>
+      <p id="winText">
+        Im glad we are able to make this journey together.
+      </p>
+      <div class="actions">
+        <button onclick="resetGame()">Play again</button>
+        <button onclick="goBack()">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------------- MUSIC (same-song continuity across pages) ---------------- */
+    const music = document.getElementById("bg-music");
+    const MUSIC_KEY_TIME = "musicTime";
+    const MUSIC_KEY_PLAYING = "musicPlaying";
+
+    const savedTime = localStorage.getItem(MUSIC_KEY_TIME);
+    const wasPlaying = localStorage.getItem(MUSIC_KEY_PLAYING) !== "false";
+
+    if (savedTime) music.currentTime = parseFloat(savedTime);
+    music.volume = 0.5;
+
+    document.addEventListener("click", () => {
+      if (music.paused && wasPlaying) {
+        music.play().catch(()=>{});
+        localStorage.setItem(MUSIC_KEY_PLAYING, "true");
+      }
+    }, { once: true });
+
+    setInterval(() => {
+      if (!music.paused) localStorage.setItem(MUSIC_KEY_TIME, music.currentTime);
+    }, 500);
+
+    music.addEventListener("play", () => localStorage.setItem(MUSIC_KEY_PLAYING, "true"));
+    music.addEventListener("pause", () => localStorage.setItem(MUSIC_KEY_PLAYING, "false"));
+
+    /* ---------------- CANVAS SETUP ---------------- */
+    const canvas = document.getElementById("scene");
+    const ctx = canvas.getContext("2d");
+
+    function resize() {
+      canvas.width = window.innerWidth * devicePixelRatio;
+      canvas.height = window.innerHeight * devicePixelRatio;
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      buildPath(); // rebuild on resize for good scaling
+    }
+    window.addEventListener("resize", resize);
+
+    /* ---------------- AESTHETIC SKY: gradient + stars + clouds ---------------- */
+    const clouds = [];
+    const stars = [];
+    const STAR_COUNT = 120;
+
+    function initSky() {
+      stars.length = 0;
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight * 0.65,
+          r: 0.6 + Math.random() * 1.6,
+          tw: Math.random() * Math.PI * 2,
+          s: 0.006 + Math.random() * 0.01
+        });
+      }
+
+      clouds.length = 0;
+      for (let i = 0; i < 6; i++) {
+        clouds.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight * 0.35,
+          size: 90 + Math.random() * 80,
+          speed: 0.08 + Math.random() * 0.15,
+          alpha: 0.16 + Math.random() * 0.12
+        });
+      }
+    }
+
+    function drawSky() {
+      const g = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+      g.addColorStop(0, "#060818");
+      g.addColorStop(0.45, "#1a1240");
+      g.addColorStop(1, "#2a0f2f");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+      // stars
+      for (const s of stars) {
+        s.tw += s.s;
+        const a = 0.35 + Math.sin(s.tw) * 0.35;
+        ctx.fillStyle = `rgba(255,255,255,${a})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawCloud(c) {
+      ctx.fillStyle = `rgba(255,255,255,${c.alpha})`;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.size * 0.38, 0, Math.PI * 2);
+      ctx.arc(c.x + c.size * 0.35, c.y - 12, c.size * 0.50, 0, Math.PI * 2);
+      ctx.arc(c.x + c.size * 0.75, c.y, c.size * 0.42, 0, Math.PI * 2);
+      ctx.fill();
+
+      c.x += c.speed;
+      if (c.x - c.size > window.innerWidth) c.x = -c.size;
+    }
+
+    /* ---------------- PATH (glowing, traceable) ---------------- */
+    let pathPoints = [];
+    let startZone = { x: 90, y: 0, r: 28 };
+    let endZone = { x: 0, y: 0, r: 32 };
+    const PATH_THICKNESS = 22;      // allowed width (feel free to tweak)
+    const PATH_GLOW = 12;
+
+    function buildPath() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // A smooth curvy path from bottom-left-ish to top-right-ish
+      startZone = { x: 110, y: h - 140, r: 28 };
+      endZone = { x: w - 120, y: 140, r: 34 };
+
+      const pts = [
+        { x: startZone.x, y: startZone.y },
+        { x: w * 0.18, y: h * 0.62 },
+        { x: w * 0.32, y: h * 0.78 },
+        { x: w * 0.45, y: h * 0.50 },
+        { x: w * 0.62, y: h * 0.64 },
+        { x: w * 0.72, y: h * 0.36 },
+        { x: w * 0.84, y: h * 0.46 },
+        { x: endZone.x, y: endZone.y }
+      ];
+
+      // Densify path for smoother collision checks
+      pathPoints = [];
+      for (let i = 0; i < pts.length - 1; i++) {
+        const a = pts[i];
+        const b = pts[i + 1];
+        const steps = 40;
+        for (let t = 0; t <= steps; t++) {
+          const p = t / steps;
+          pathPoints.push({
+            x: a.x + (b.x - a.x) * p,
+            y: a.y + (b.y - a.y) * p
+          });
+        }
+      }
+    }
+
+    function drawPath() {
+      // glow
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      ctx.strokeStyle = "rgba(255, 140, 200, 0.20)";
+      ctx.lineWidth = PATH_THICKNESS + PATH_GLOW;
+      ctx.beginPath();
+      for (let i = 0; i < pathPoints.length; i++) {
+        const p = pathPoints[i];
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+
+      // core path
+      ctx.strokeStyle = "rgba(255, 170, 220, 0.75)";
+      ctx.lineWidth = PATH_THICKNESS;
+      ctx.beginPath();
+      for (let i = 0; i < pathPoints.length; i++) {
+        const p = pathPoints[i];
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+
+      // start + end markers
+      drawMarker(startZone.x, startZone.y, startZone.r, "START");
+      drawMarker(endZone.x, endZone.y, endZone.r, "END");
+    }
+
+    function drawMarker(x, y, r, label) {
+      ctx.save();
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = "rgba(255, 120, 200, 0.7)";
+      ctx.fillStyle = "rgba(255, 120, 200, 0.35)";
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.font = "600 12px Quicksand, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(label, x, y + 4);
+      ctx.restore();
+    }
+
+    /* ---------------- PLAYER (snake trail + image cursor) ---------------- */
+    const coupleImg = new Image();
+    coupleImg.src = "images/catbats.png"; // <-- CHANGE if needed
+
+    const player = {
+      x: 0,
+      y: 0,
+      tx: 0,
+      ty: 0,
+      trail: [],
+      trailLen: 28,
+      speed: 0.16,     // how fast it follows your mouse (0..1)
+      size: 44
+    };
+
+    let gameActive = false;
+    let won = false;
+
+    function resetGame() {
+      won = false;
+      gameActive = true;
+
+      player.x = startZone.x;
+      player.y = startZone.y;
+      player.tx = startZone.x;
+      player.ty = startZone.y;
+      player.trail = [];
+
+      document.getElementById("winModal").style.display = "none";
+      document.getElementById("status").textContent = "Stay on the glowing path ✨";
+    }
+
+    function goBack() {
+      window.location.href = "yes.html"; // change if you want a different back page
+    }
+
+    // Mouse / touch controls
+    function setTarget(x, y) {
+      player.tx = x;
+      player.ty = y;
+    }
+
+    window.addEventListener("mousemove", (e) => setTarget(e.clientX, e.clientY));
+    window.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      setTarget(t.clientX, t.clientY);
+    }, { passive: true });
+
+    function updatePlayer() {
+      // Smooth follow
+      player.x += (player.tx - player.x) * player.speed;
+      player.y += (player.ty - player.y) * player.speed;
+
+      // Trail
+      player.trail.unshift({ x: player.x, y: player.y });
+      if (player.trail.length > player.trailLen) player.trail.pop();
+    }
+
+    function drawTrail() {
+      for (let i = player.trail.length - 1; i >= 0; i--) {
+        const p = player.trail[i];
+        const a = (i / player.trail.length) * 0.30;
+        ctx.fillStyle = `rgba(255, 170, 220, ${a})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 10 + (i * 0.2), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawPlayer() {
+      const s = player.size;
+
+      // cute glow behind the image
+      ctx.save();
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = "rgba(255, 120, 200, 0.8)";
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, s * 0.55, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 140, 210, 0.16)";
+      ctx.fill();
+      ctx.restore();
+
+      // draw image
+      ctx.drawImage(coupleImg, player.x - s/2, player.y - s/2, s, s);
+    }
+
+    /* ---------------- COLLISION: Stay on path ---------------- */
+    function dist2(ax, ay, bx, by) {
+      const dx = ax - bx;
+      const dy = ay - by;
+      return dx*dx + dy*dy;
+    }
+
+    function isOnPath(x, y) {
+      // check closest path point
+      let best = Infinity;
+      // early-out: sampling step for speed
+      for (let i = 0; i < pathPoints.length; i += 2) {
+        const p = pathPoints[i];
+        const d = dist2(x, y, p.x, p.y);
+        if (d < best) best = d;
+      }
+      return best <= (PATH_THICKNESS * PATH_THICKNESS);
+    }
+
+    function reachedEnd(x, y) {
+      return dist2(x, y, endZone.x, endZone.y) <= (endZone.r * endZone.r);
+    }
+
+    function loseBounce() {
+      // “bonk” back to start
+      player.x = startZone.x;
+      player.y = startZone.y;
+      player.tx = startZone.x;
+      player.ty = startZone.y;
+      player.trail = [];
+      document.getElementById("status").textContent = "Bonk! back to start… try again!";
+      setTimeout(() => {
+        if (!won) document.getElementById("status").textContent = "Stay on the glowing path";
+      }, 900);
+    }
+
+    function win() {
+      won = true;
+      gameActive = false;
+
+      // quirky note
+      const lines = [
+        "You did it Baby, Gotham’s cutest duo made it home.",
+        "Certified Vigilante Badass.",
+        "Your prize: one (1) voucher to do whatever you want + unlimited kisses forever.",
+        "Love you so much!"
+      ];
+      document.getElementById("winText").innerHTML = lines.join("<br><br>");
+
+      document.getElementById("winModal").style.display = "flex";
+      document.getElementById("status").textContent = "WIN 💖";
+    }
+
+    /* ---------------- MAIN LOOP ---------------- */
+    function animate() {
+      drawSky();
+      clouds.forEach(drawCloud);
+
+      drawPath();
+
+      if (gameActive) {
+        updatePlayer();
+        drawTrail();
+        drawPlayer();
+
+        // collision check uses player head
+        if (!isOnPath(player.x, player.y)) {
+          loseBounce();
+        }
+
+        if (reachedEnd(player.x, player.y)) {
+          win();
+        }
+      } else {
+        // still draw player for a nice paused look
+        drawTrail();
+        drawPlayer();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    /* ---------------- INIT ---------------- */
+    function init() {
+      resize();
+      initSky();
+      resetGame();
+      animate();
+    }
+
+    // Ensure image loads before starting (so it renders immediately)
+    coupleImg.onload = init;
+    coupleImg.onerror = () => {
+      // If image fails to load, still start game (you’ll see glow + trail)
+      init();
+    };
+  </script>
+</body>
+</html>

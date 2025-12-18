@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>To My Love ❤️</title>
+
+<!-- Cute Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- CSS Styling for the page -->
+<style> 
+    body { 
+        margin: 0;
+        height: 100vh;
+        background: linear-gradient(135deg, #97748b, #c79ec5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Nunito', sans-serif;
+        color: #444;
+    }
+
+
+    .card1 {
+        background: rgb(223, 182, 207);
+        padding: 100px;
+        border-radius: 30px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        text-align: center; 
+        max-width: 500px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .card1 img {
+        display: block;
+        filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.35));
+    }
+
+    .card2 {
+        background: rgb(223, 97, 116);
+        padding: 50px;
+        border-radius: 30px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        text-align: center; 
+        max-width: 600px;
+        margin-top: 30px;
+    }
+
+    h1 {
+        font-family: 'Nunito', sans-serif;
+        color: #ffffff;
+        margin-bottom: 30px;
+    }
+
+    h2 {
+        font-family: 'Nunito', sans-serif;
+        color: #ffffff;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        font-family: 'Nunito', sans-serif;
+        color: #ffffff;
+        margin-bottom: 15px;
+    }
+
+    p {
+        font-family: 'Nunito', sans-serif;
+        color: #ffffff;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 25px 25px;
+        border: none;
+        border-radius: 25px;
+        background: #aa2350;
+        color: white;
+        font-family: 'Nunito', sans-serif;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 1s;
+    }
+
+    .button-group{
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    button:hover {
+        background: #fa9cba;
+    }
+
+    #secret {
+        display: none;
+        margin-top: 20px;
+        font-weight: 600;
+        color: #b31949;
+    }
+
+    #garden {
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        z-index: -1;
+    }
+
+    .page {
+        position: relative;
+        z-index: 1;
+    }
+
+  </style>
+</head>
+
+
+
+
+
+
+<body> <!-- This is where all the text is to be edited-->
+    <audio id="bg-music" loop></audio>
+
+    <canvas id="garden"></canvas>
+    <div class="page">
+        <div class="card1">
+        <h1>Would you please accept my gift</h1>
+
+        <img src="images/catheart.png" style="width: 300px;">
+
+        <h2>
+            I thought this would be a cute way to show you my appreciate for you.
+            But first, would you like to continue with this little surprise?
+        </h2>
+
+
+<!-- Interactive Button to reveal secret message -->
+        <div class="button-group">
+            <button onclick="goToYesPage()">Yes</button>
+            <button onclick="noClicked()">No</button>
+        </div>
+
+        <div id="secret">
+            <div class="card2">
+                <h2>You’re my favorite person in the world. I love you more than words can express! 
+                    Forever Yours,</h2>
+                <h1>Devlin</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<!-- JavaScript to handle button click -->
+<script>
+    // Background Music Control
+    const music = document.getElementById("bg-music");
+    const PAGE_MUSIC = "music/TaylotCardigan.mp3";
+
+    const savedTime = localStorage.getItem("musicTime");
+    const isPlaying = localStorage.getItem("musicPlaying") !== "false";
+
+    music.src = PAGE_MUSIC;
+
+    if (savedTime) {
+        music.currentTime = parseFloat(savedTime);
+    }
+
+  // Start music after user interaction
+    document.addEventListener("click", () => {
+        if (music.paused && isPlaying) {
+        music.volume = 0.5;
+        music.play().catch(() => {});
+        localStorage.setItem("musicPlaying", "true");
+        }
+    });
+
+  // Save time every half second
+    setInterval(() => {
+        if (!music.paused) {
+        localStorage.setItem("musicTime", music.currentTime);
+        }
+    }, 500);
+
+    music.addEventListener("pause", () => {
+        localStorage.setItem("musicPlaying", "false");
+    });
+
+    music.addEventListener("play", () => {
+        localStorage.setItem("musicPlaying", "true");
+    });
+
+
+
+    /* CANVAS SETUP */
+    const canvas = document.getElementById("garden");
+    const ctx = canvas.getContext("2d");
+
+    function drawSky() {
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, "#b7cbe5");
+        gradient.addColorStop(0.5, "#d9c7de");
+        gradient.addColorStop(1, "#e6c3d3");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+
+
+    function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    const flowers = [];
+
+    function randomColor() {
+    const colors = ["#ff9aa2", "#ffb7b2", "#ffdac1", "#e2f0cb", "#b5ead7"];
+    return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function createFlower(x) {
+        flowers.push({
+        x,
+        y: canvas.height,
+        height: 0,
+        maxHeight: canvas.height * (0.25 + Math.random() * 0.15),
+        color: randomColor(),
+        bloom: 0,
+        speed: 0.6 + Math.random() * 0.8
+        });
+    }
+
+    document.addEventListener("click", (e) => {
+        createFlower(e.clientX);
+    });
+
+// initial flowers
+    for (let i = 0; i < 8; i++) {
+        createFlower(Math.random() * canvas.width);
+    }
+
+    function drawFlower(f) {
+        const time = Date.now();
+        const sway = Math.sin(time / 800 + f.x) * 10;
+
+        const cx = f.x + sway;
+        const cy = canvas.height - f.height;
+
+  // Stem
+        ctx.strokeStyle = "#4caf50";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(f.x, canvas.height);
+        ctx.lineTo(cx, cy);
+        ctx.stroke();
+    // Bloom
+        if (f.height >= f.maxHeight) {
+        f.bloom = Math.min(f.bloom + 0.4, 26);
+        ctx.fillStyle = f.color;
+
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI * 2 / 6) * i;
+
+    // pull petals closer to center
+            const radius = f.bloom * 0.8;
+
+            const px = cx + Math.cos(angle) * radius;
+            const py = cy + Math.sin(angle) * radius;
+
+    // inward rotation
+            const dx = cx - px;
+            const dy = cy - py;
+            const rot = Math.atan2(dy, dx);
+
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(rot);
+
+    // ❤️ BIG, CLEAR heart
+            ctx.beginPath();
+            ctx.moveTo(0, -8);
+            ctx.bezierCurveTo(-22, -28, -44, 6, 0, 42);
+            ctx.bezierCurveTo(44, 6, 22, -28, 0, -8);
+            ctx.fill();
+
+            ctx.restore();
+        }
+    }   
+    }
+
+    const clouds = [];
+
+        for (let i = 0; i < 5; i++) {
+            clouds.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 0.4,
+                size: 80 + Math.random() * 60,
+                speed: 0.1 + Math.random() * 0.2
+            });
+        }
+
+    function drawCloud(c) {
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.beginPath();
+  ctx.arc(c.x, c.y, c.size * 0.4, 0, Math.PI * 2);
+  ctx.arc(c.x + c.size * 0.4, c.y - 10, c.size * 0.5, 0, Math.PI * 2);
+  ctx.arc(c.x + c.size * 0.8, c.y, c.size * 0.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  c.x += c.speed;
+  if (c.x - c.size > canvas.width) {
+    c.x = -c.size;
+  }
+}
+
+function animate() {
+  drawSky(); // 🌤️ sky
+
+  clouds.forEach(drawCloud); // ☁️ clouds
+
+  flowers.forEach(f => {
+    if (f.height < f.maxHeight) {
+      f.height += f.speed;
+    }
+    drawFlower(f);
+  });
+
+  requestAnimationFrame(animate);
+}
+
+
+    animate();
+        
+    let noClickCount = 0;
+    const noMessages = [
+        "Are you sure? Its not like its weird!",
+        "Last chance, Otherwise you just hate me :)",
+        "If you press yes we can get dessert?",
+        "I really want you to at least see it.",
+        "Come on, it'll make me so happy if you say yes!",
+        "Do you even love me?"
+    ]
+
+    function goToYesPage() {
+        window.location.href = "yes.html";
+    }
+
+    function noClicked() {
+        document.querySelector("h2").textContent = noMessages[noClickCount % noMessages.length];
+        noClickCount++;
+    }
+</script>
+
+</body>
+</html>
